@@ -2,13 +2,50 @@ group 'jp.k_ui.example'
 version '1.0-SNAPSHOT'
 
 apply plugin: 'java'
+apply plugin: 'idea'
+apply plugin: 'application'
 
-sourceCompatibility = 1.5
+mainClassName = 'Main'
+
+sourceCompatibility = '1.8'
 
 repositories {
     mavenCentral()
 }
 
+configurations {
+    checkerFrameworkAnnotatedJDK
+    annotationProcessors
+}
+
 dependencies {
-    testCompile group: 'junit', name: 'junit', version: '4.11'
+    def checkerFrameworkVersion = '2.1.4'
+    checkerFrameworkAnnotatedJDK "org.checkerframework:jdk8:${checkerFrameworkVersion}"
+    annotationProcessors "org.checkerframework:checker:${checkerFrameworkVersion}"
+    compileOnly "org.checkerframework:checker-qual:${checkerFrameworkVersion}"
+    compile 'com.google.code.findbugs:jsr305:3.0.1'
+
+    def lombok = 'org.projectlombok:lombok:1.16.10'
+    annotationProcessors lombok
+    compileOnly lombok
+}
+
+allprojects {
+    tasks.withType(JavaCompile).all { compile ->
+        def processors = [
+                'org.checkerframework.checker.nullness.NullnessChecker',
+                'lombok.launch.AnnotationProcessorHider\$AnnotationProcessor',
+        ]
+        compile.options.compilerArgs = [
+                '-processor', processors.join(','),
+                '-processorpath', "${configurations.annotationProcessors.asPath}",
+                "-Xbootclasspath/p:${configurations.checkerFrameworkAnnotatedJDK.asPath}"
+        ]
+    }
+}
+
+idea {
+    module {
+        scopes.PROVIDED.plus += [ configurations.annotationProcessors ]
+    }
 }
