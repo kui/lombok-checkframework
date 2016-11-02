@@ -30,22 +30,20 @@ dependencies {
     compileOnly lombok
 }
 
-allprojects {
-    tasks.withType(JavaCompile).all { compile ->
-        def processors = [
-                'org.checkerframework.checker.nullness.NullnessChecker',
-                'lombok.launch.AnnotationProcessorHider\$AnnotationProcessor',
-        ]
-        compile.options.compilerArgs = [
-                '-processor', processors.join(','),
-                '-processorpath', "${configurations.annotationProcessors.asPath}",
-                "-Xbootclasspath/p:${configurations.checkerFrameworkAnnotatedJDK.asPath}"
-        ]
-    }
+compileJava {
+    def processors = [
+            'org.checkerframework.checker.nullness.NullnessChecker',
+            'lombok.launch.AnnotationProcessorHider\$AnnotationProcessor',
+    ]
+    options.compilerArgs = [
+            '-processor', processors.join(','),
+            '-processorpath', "${configurations.annotationProcessors.asPath}",
+            "-Xbootclasspath/p:${configurations.checkerFrameworkAnnotatedJDK.asPath}"
+    ]
 }
 
 idea {
     module {
-        scopes.PROVIDED.plus += [ configurations.annotationProcessors ]
+        scopes.PROVIDED.plus += [configurations.annotationProcessors]
     }
 }

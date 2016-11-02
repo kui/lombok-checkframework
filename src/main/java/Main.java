@@ -1,5 +1,3 @@
-import javax.annotation.Nullable;
-
 import lombok.Value;
 
 public final class Main {
